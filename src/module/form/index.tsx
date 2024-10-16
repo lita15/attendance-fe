@@ -1,10 +1,14 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import SignatureCanvas from "react-signature-canvas";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { checkNumberCard, createAttendance } from "./api";
 
 const AttendanceForm = () => {
+  const { mutate } = createAttendance();
+  const { mutate: checkNumber } = checkNumberCard();
+
   const {
     handleSubmit,
     setValue,
@@ -20,6 +24,7 @@ const AttendanceForm = () => {
       gender: "",
       identity: "",
       signature: "",
+      checkIn: new Date(),
     },
   });
 
@@ -34,13 +39,44 @@ const AttendanceForm = () => {
       !values.numberCard ||
       !values.meetWith ||
       !values.gender ||
+      !values.checkIn ||
       !values.signature
     ) {
       toast.error("Please fill in all required fields.");
     } else {
-      console.log("Form submitted:", values);
-      toast.success("Form submitted successfully!");
-      window.location.reload();
+      mutate(values, {
+        onSuccess() {
+          toast.success("sukses attend");
+          const pdfUrl = `http://localhost:4000/public/pdfAttendance-${values?.fullName}.pdf`;
+          window.open(pdfUrl, "_blank");
+        },
+        onError() {
+          toast.error("Number card is currently in use");
+        },
+      });
+    }
+  };
+
+  const handleCheckNumberCard = (values: any) => {
+    if (!values.numberCard) {
+      toast.error("Please fill number card");
+    } else {
+      const payload = {
+        numberCard: values.numberCard,
+      };
+
+      checkNumber(payload as any, {
+        onSuccess(res) {
+          if (res.message == "Number card is currently in use.") {
+            toast.error(res.message);
+          } else {
+            toast.success(res.message);
+          }
+        },
+        onError() {
+          toast.error("error");
+        },
+      });
     }
   };
 
@@ -93,6 +129,7 @@ const AttendanceForm = () => {
                 <button
                   type="button"
                   className="py-1 bg-[#498AD4] px-3 rounded-md text-sm hover:bg-[#899fb8]"
+                  onClick={handleSubmit(handleCheckNumberCard)}
                 >
                   Check
                 </button>
@@ -106,23 +143,24 @@ const AttendanceForm = () => {
           </div>
 
           {/* Address Section */}
-          <section className="flex flex-col w-full gap-y-2 mb-6">
-            <label htmlFor="address" className="text-md font-bold">
-              Address
-            </label>
-            <input
-              placeholder="Ungaran Raya II"
-              value={watch("address")}
-              onChange={(e) => setValue("address", e.target.value)}
-              className="border-b-[0.5px] focus:border-[#498AD4] px-2 text-sm py-1.5 outline-none border-slate-200 transition-colors ease-in-out w-full text-black placeholder:text-black/70"
-            />
-            {errors.address && (
-              <div className="text-red-500 text-sm">
-                {errors.address.message}
-              </div>
-            )}
-          </section>
-
+          <div className="md:flex gap-10">
+            <section className="flex flex-col w-full gap-y-2 mb-6">
+              <label htmlFor="address" className="text-md font-bold">
+                Address
+              </label>
+              <input
+                placeholder="Ungaran Raya II"
+                value={watch("address")}
+                onChange={(e) => setValue("address", e.target.value)}
+                className="border-b-[0.5px] focus:border-[#498AD4] px-2 text-sm py-1.5 outline-none border-slate-200 transition-colors ease-in-out w-full text-black placeholder:text-black/70"
+              />
+              {errors.address && (
+                <div className="text-red-500 text-sm">
+                  {errors.address.message}
+                </div>
+              )}
+            </section>
+          </div>
           {/* Purpose & Meet With Section */}
           <div className="md:flex gap-10">
             {/* Purpose Section */}
