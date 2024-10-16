@@ -49,6 +49,7 @@ const AttendanceForm = () => {
           toast.success("sukses attend");
           const pdfUrl = `http://localhost:4000/public/pdfAttendance-${values?.fullName}.pdf`;
           window.open(pdfUrl, "_blank");
+          // window.location.reload();
         },
         onError() {
           toast.error("Number card is currently in use");
