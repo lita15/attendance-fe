@@ -28,14 +28,22 @@ const AttendanceForm = () => {
       checkIn: new Date(),
       noPhone: "",
       education: "",
+      purposeInput: "",
     },
   });
   const signatureRef = useRef<SignatureCanvas>(null);
   const handleFormSubmit = (values: any) => {
+    const purpose =
+      values.purpose === "another" && values.purposeInput
+        ? values.purposeInput
+        : values.purpose;
+
+    console.log("Purpose:", purpose); // Check what purpose is being sent
+    // console.log("Form Data:", data);
     if (
       !values.fullName ||
       !values.address ||
-      !values.purpose ||
+      !purpose ||
       !values.identity ||
       !values.numberCard ||
       !values.meetWith ||
@@ -89,6 +97,17 @@ const AttendanceForm = () => {
       setValue("signature", dataURL);
     }
   };
+
+  const optionEducation = [
+    { value: "sd", label: "SD" },
+    { value: "smp", label: "SMP" },
+    { value: "sma", label: "SMA" },
+    { value: "d3", label: "D3" },
+    { value: "d4", label: "D4" },
+    { value: "s1", label: "S1" },
+    { value: "s2", label: "S2" },
+    { value: "s3", label: "S3" },
+  ];
 
   return (
     <div className="flex justify-center">
@@ -195,16 +214,7 @@ const AttendanceForm = () => {
                     .toLowerCase()
                     .includes(input.toLowerCase())
                 }
-                options={[
-                  { value: "sd", label: "SD" },
-                  { value: "smp", label: "SMP" },
-                  { value: "sma", label: "SMA" },
-                  { value: "d3", label: "D3" },
-                  { value: "d4", label: "D4" },
-                  { value: "s1", label: "S1" },
-                  { value: "s2", label: "S2" },
-                  { value: "s3", label: "S3" },
-                ]}
+                options={optionEducation}
                 value={watch("education")}
                 onChange={(value: any) => setValue("education", value)}
               />
@@ -251,17 +261,21 @@ const AttendanceForm = () => {
                 </label>
                 <label>
                   <input
-                    type="radio"
-                    value="another"
-                    checked={watch("purpose") === ""}
-                    onChange={() => setValue("purpose", "")}
-                    className="mr-2"
-                  />
-                  <input
                     type="text"
-                    placeholder="Bu Fatimah"
-                    value={watch("purpose")}
-                    onChange={(e) => setValue("purpose", e.target.value)}
+                    placeholder="Input Another Purpose"
+                    value={
+                      watch("purpose") === "another"
+                        ? watch("purposeInput") || ""
+                        : watch("purpose")
+                    }
+                    onChange={(e) => {
+                      const inputValue = e.target.value;
+                      if (watch("purpose") === "another") {
+                        setValue("purposeInput", inputValue);
+                      } else {
+                        setValue("purpose", inputValue);
+                      }
+                    }}
                     className="border-b-[0.5px] focus:border-[#498AD4] px-2 text-sm py-1.5 outline-none border-slate-200 transition-colors ease-in-out w-full text-black placeholder:text-black/70"
                   />
                 </label>
@@ -297,7 +311,7 @@ const AttendanceForm = () => {
           <div className="md:flex gap-10">
             {/* Gender Section */}
             <section className="flex flex-col w-full gap-y-2 mb-6">
-              <label className="text-md font-bold">Jenis Kelamin</label>
+              <label className="text-md font-bold">Gender</label>
               <div className="flex items-center gap-x-4">
                 <label className="text-sm">
                   <input
