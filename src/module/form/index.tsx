@@ -4,11 +4,12 @@ import SignatureCanvas from "react-signature-canvas";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { checkNumberCard, createAttendance } from "./api";
+import { DownOutlined } from "@ant-design/icons/lib";
+import { Select } from "antd/lib";
 
 const AttendanceForm = () => {
   const { mutate } = createAttendance();
   const { mutate: checkNumber } = checkNumberCard();
-
   const {
     handleSubmit,
     setValue,
@@ -25,11 +26,11 @@ const AttendanceForm = () => {
       identity: "",
       signature: "",
       checkIn: new Date(),
+      noPhone: "",
+      education: "",
     },
   });
-
   const signatureRef = useRef<SignatureCanvas>(null);
-
   const handleFormSubmit = (values: any) => {
     if (
       !values.fullName ||
@@ -40,7 +41,8 @@ const AttendanceForm = () => {
       !values.meetWith ||
       !values.gender ||
       !values.checkIn ||
-      !values.signature
+      !values.signature ||
+      !values.noPhone
     ) {
       toast.error("Please fill in all required fields.");
     } else {
@@ -162,6 +164,53 @@ const AttendanceForm = () => {
               )}
             </section>
           </div>
+
+          <div className="md:flex gap-10">
+            <section className="flex flex-col w-full gap-y-2 mb-4">
+              <label htmlFor="noPhone" className="text-md font-bold">
+                No Phone
+              </label>
+              <input
+                placeholder="089725281639"
+                type="number"
+                value={watch("noPhone")}
+                onChange={(e) => setValue("noPhone", e.target.value)}
+                className="border-b-[0.5px] focus:border-[#498AD4] px-2 text-sm py-1.5 outline-none border-slate-200 transition-colors ease-in-out w-full text-black placeholder:text-black/70"
+              />
+              {errors.noPhone && (
+                <div className="text-red-500 text-sm">
+                  {errors.noPhone.message}
+                </div>
+              )}
+            </section>
+            <section className="flex flex-col w-full gap-y-2 mb-4">
+              <label htmlFor="education" className="text-md font-bold">
+                Last Education
+              </label>
+              <Select
+                showSearch
+                placeholder="Select yout last education"
+                filterOption={(input, option) =>
+                  (option?.label ?? "")
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
+                }
+                options={[
+                  { value: "sd", label: "SD" },
+                  { value: "smp", label: "SMP" },
+                  { value: "sma", label: "SMA" },
+                  { value: "d3", label: "D3" },
+                  { value: "d4", label: "D4" },
+                  { value: "s1", label: "S1" },
+                  { value: "s2", label: "S2" },
+                  { value: "s3", label: "S3" },
+                ]}
+                value={watch("education")}
+                onChange={(value: any) => setValue("education", value)}
+              />
+            </section>
+          </div>
+
           {/* Purpose & Meet With Section */}
           <div className="md:flex gap-10">
             {/* Purpose Section */}
@@ -199,6 +248,22 @@ const AttendanceForm = () => {
                     className="mr-2"
                   />
                   Send Barang
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    value="another"
+                    checked={watch("purpose") === ""}
+                    onChange={() => setValue("purpose", "")}
+                    className="mr-2"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Bu Fatimah"
+                    value={watch("purpose")}
+                    onChange={(e) => setValue("purpose", e.target.value)}
+                    className="border-b-[0.5px] focus:border-[#498AD4] px-2 text-sm py-1.5 outline-none border-slate-200 transition-colors ease-in-out w-full text-black placeholder:text-black/70"
+                  />
                 </label>
               </div>
               {errors.purpose && (
